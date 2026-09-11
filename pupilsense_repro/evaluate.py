@@ -12,6 +12,7 @@ from .preprocessing import EyePreprocessor
 def run_inference(model, dataset, batch_size: int = 128, device: str = "cpu") -> pd.DataFrame:
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
     records = []
+    model = model.to(device)
     model.eval()
     with torch.no_grad():
         for tensors, trues, participant_ids, session_ids, frame_paths in tqdm(loader, desc="Predicting"):
@@ -26,6 +27,7 @@ def run_inference(model, dataset, batch_size: int = 128, device: str = "cpu") ->
 
 
 def predict_diameter(pil_image: Image.Image, model, preprocessor: EyePreprocessor, device: str = "cpu") -> float:
+    model = model.to(device)
     model.eval()
     with torch.no_grad():
         tensor = preprocessor(pil_image).unsqueeze(0).to(device)

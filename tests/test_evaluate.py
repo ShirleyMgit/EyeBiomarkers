@@ -22,6 +22,7 @@ def test_run_inference_columns_and_length(synthetic_data_root):
     assert len(out) == len(ds)
     assert list(out.columns) == ["participant_id", "session_id", "frame_path", "true", "prediction"]
     assert (out["prediction"].round(4) == 2.3).all()
+    assert out["frame_path"].tolist() == idx["frame_path"].tolist()
 
 
 def test_predict_diameter_single_image():
