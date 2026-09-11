@@ -1,7 +1,7 @@
 [project]
 name = "eyebiomarkers"
 version = "0.1.0"
-description = "Add your description here"
+description = "Reproduce PupilSense left-eye pupil-diameter MAPE on the EyeDentify dataset."
 requires-python = ">=3.12"
 dependencies = [
     "matplotlib>=3.11.1",
