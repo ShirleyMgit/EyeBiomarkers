@@ -12,7 +12,7 @@
 
 - Target **Python 3.12** (matches Google Colab).
 - Managed with **uv** locally: `uv add` / `uv run` / `uv sync` — never `pip install`. On Colab, torch/torchvision/pandas are preinstalled.
-- **Pandas rules (user global):** never call `df.copy()`; never use `inplace=True` (reassign explicitly); never use `.apply()`, `.iterrows()`, `.itertuples()`, `.items()` — vectorize, or use list comprehensions over `zip(...)`. At package import set `pd.options.mode.copy_on_write = True` (safe on pandas 2.x; no-op semantics on 3.x).
+- **Pandas rules (user global):** never call `df.copy()`; never use `inplace=True` (reassign explicitly); never use `.apply()`, `.iterrows()`, `.itertuples()`, `.items()` — vectorize, or use list comprehensions over `zip(...)`. At package import, enable copy-on-write **only on pandas < 3.0** (`if int(pd.__version__.split(".")[0]) < 3: pd.options.mode.copy_on_write = True`) — on pandas ≥ 3.0 CoW is unconditional and setting the option emits a deprecation warning, so it must be guarded.
 - **Clean Code (user global):** self-explanatory names; `@dataclass` (frozen where immutable) over boilerplate; classes over loose scripts where state groups; comments only for non-obvious "why".
 - **Eye scope:** left eye only; target ground-truth column is `left_pupil`.
 - **Preprocessing (paper-exact):** stored PNG is W=32×H=16 → `Resize((32,64), BICUBIC)` → zero-pad to 224×224 → `Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])`.
