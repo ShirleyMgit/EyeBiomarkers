@@ -9,7 +9,6 @@ from PIL import Image
 def synthetic_data_root(tmp_path) -> Path:
     """Two participants, two sessions each, two frames each, with session_data.csv."""
     root = tmp_path / "left_eyes_data"
-    rows_per = []
     for pid in (1, 2):
         for sid in (1, 2):
             session_dir = root / str(pid) / str(sid)

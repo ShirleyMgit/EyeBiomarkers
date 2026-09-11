@@ -6,7 +6,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 from .config import FOLD_TEST_PARTICIPANTS, PAPER_MAPE
 
@@ -32,6 +31,7 @@ def plot_per_participant_mape(per_participant_by_base, out_path, folds=FOLD_TEST
     ax.set_ylabel("Per-participant MAPE (%)")
     ax.set_title("Left-eye per-participant MAPE (red dash = paper mean; point color = fold)")
     fig.tight_layout()
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
     plt.close(fig)
     return Path(out_path)
@@ -46,6 +46,7 @@ def plot_mape_histogram(per_participant_by_base, out_path) -> Path:
     ax.legend()
     ax.set_title("Distribution of per-participant MAPE")
     fig.tight_layout()
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
     plt.close(fig)
     return Path(out_path)
@@ -61,6 +62,7 @@ def plot_pred_vs_true(predictions_df, out_path) -> Path:
     ax.set_ylabel("Predicted diameter (mm)")
     ax.set_title("Predicted vs true (left eye)")
     fig.tight_layout()
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
     plt.close(fig)
     return Path(out_path)
@@ -79,6 +81,7 @@ def plot_diameter_over_frames(predictions_df, participant_id, session_id, out_pa
     ax.set_title(f"Diameter over frames — participant {participant_id}, session {session_id}")
     ax.legend()
     fig.tight_layout()
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
     plt.close(fig)
     return Path(out_path)

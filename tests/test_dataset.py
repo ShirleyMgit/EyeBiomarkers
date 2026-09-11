@@ -1,4 +1,4 @@
-import torch
+import pytest
 from pupilsense_repro.dataset import build_index, EyeDentifyDataset
 from pupilsense_repro.preprocessing import EyePreprocessor
 
@@ -23,3 +23,8 @@ def test_dataset_getitem(synthetic_data_root):
     assert tensor.shape == (3, 224, 224)
     assert isinstance(true, float) and isinstance(pid, int)
     assert len(ds) == 8
+
+
+def test_build_index_raises_on_empty_root(tmp_path):
+    with pytest.raises(ValueError, match="No frames found"):
+        build_index(tmp_path, eye="left")

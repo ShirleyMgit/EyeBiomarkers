@@ -28,7 +28,7 @@ class EyePreprocessor:
         ])
 
     @classmethod
-    def from_config(cls, config: ReproConfig) -> "EyePreprocessor":
+    def from_config(cls, config: ReproConfig) -> EyePreprocessor:
         return cls(config.resize_hw, config.target_size, config.imagenet_mean, config.imagenet_std)
 
     def __call__(self, img: Image.Image) -> torch.Tensor:

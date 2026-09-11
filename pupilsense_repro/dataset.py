@@ -31,6 +31,11 @@ def build_index(data_root: Path, eye: str = "left") -> pd.DataFrame:
                 "image_path": img,
                 "true": float(val),
             })
+    if not frames:
+        raise ValueError(
+            f"No frames found under data_root={data_root!r}. Check the path and that it contains "
+            f"<participant>/<session>/session_data.csv with existing frame images."
+        )
     return pd.DataFrame(frames)
 
 

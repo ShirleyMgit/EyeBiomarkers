@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 
 import torch
@@ -26,11 +27,24 @@ class ResNetRegressor(nn.Module):
 
 def load_eye_model(weights_path: str | Path, base: str = "resnet18", device: str = "cpu") -> nn.Module:
     model = ResNetRegressor(base)
-    state_dict = torch.load(weights_path, map_location=device)
-    filtered = {k: v for k, v in state_dict.items() if not k.startswith("resnet.fc")}
-    missing, unexpected = model.load_state_dict(filtered, strict=False)
-    if unexpected:
-        print(f"Warning: unexpected keys in checkpoint: {unexpected}")
+    checkpoint = torch.load(weights_path, map_location=device, weights_only=True)
+    model_state = model.state_dict()
+    compatible = {
+        key: tensor
+        for key, tensor in checkpoint.items()
+        if key in model_state and tensor.shape == model_state[key].shape
+    }
+    dropped = [key for key in checkpoint if key not in compatible]
+    missing, _ = model.load_state_dict(compatible, strict=False)
+    if dropped:
+        warnings.warn(f"Dropped {len(dropped)} checkpoint key(s) absent from or shape-mismatched vs the model: {dropped}")
+    if missing:
+        warnings.warn(f"{len(missing)} model parameter(s) not found in checkpoint (left at random init): {missing}")
+    if any(key.startswith("resnet.fc") for key in missing):
+        warnings.warn(
+            "Regression head (resnet.fc) was NOT loaded from the checkpoint and remains at random "
+            "init - predicted diameters will be meaningless. Verify the checkpoint's key layout."
+        )
     model.to(device)
     model.eval()
     return model
