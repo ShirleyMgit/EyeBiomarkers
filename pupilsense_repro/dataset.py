@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -14,10 +15,15 @@ def build_index(data_root: Path, eye: str = "left") -> pd.DataFrame:
     pupil_col = f"{eye}_pupil"
     session_csvs = sorted(data_root.glob("*/*/session_data.csv"))
     frames = []
+    skipped_dirs = []
     for csv_path in session_csvs:
         session_dir = csv_path.parent
-        participant_id = int(session_dir.parent.name)
-        session_id = int(session_dir.name)
+        participant_name, session_name = session_dir.parent.name, session_dir.name
+        if not (participant_name.isdigit() and session_name.isdigit()):
+            skipped_dirs.append(str(session_dir))
+            continue
+        participant_id = int(participant_name)
+        session_id = int(session_name)
         table = pd.read_csv(csv_path)
         image_paths = [str(data_root / rel) for rel in table["frame_path"]]
         existing = [(rel, img, val)
@@ -31,6 +37,12 @@ def build_index(data_root: Path, eye: str = "left") -> pd.DataFrame:
                 "image_path": img,
                 "true": float(val),
             })
+    if skipped_dirs:
+        warnings.warn(
+            f"Skipped {len(skipped_dirs)} session dir(s) with non-numeric participant/session names "
+            f"(e.g. duplicate uploads like '4 (1)'): {skipped_dirs[:10]}"
+            f"{' ...' if len(skipped_dirs) > 10 else ''}"
+        )
     if not frames:
         raise ValueError(
             f"No frames found under data_root={data_root!r}. Check the path and that it contains "

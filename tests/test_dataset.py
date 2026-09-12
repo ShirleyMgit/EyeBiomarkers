@@ -28,3 +28,15 @@ def test_dataset_getitem(synthetic_data_root):
 def test_build_index_raises_on_empty_root(tmp_path):
     with pytest.raises(ValueError, match="No frames found"):
         build_index(tmp_path, eye="left")
+
+
+def test_build_index_skips_non_numeric_dirs(synthetic_data_root):
+    import shutil
+    duplicate = synthetic_data_root / "4 (1)" / "1"
+    duplicate.mkdir(parents=True)
+    shutil.copy(synthetic_data_root / "1" / "1" / "session_data.csv", duplicate / "session_data.csv")
+
+    with pytest.warns(UserWarning, match="non-numeric participant/session"):
+        idx = build_index(synthetic_data_root, eye="left")
+
+    assert set(idx["participant_id"]) == {1, 2}  # the '4 (1)' duplicate is excluded
