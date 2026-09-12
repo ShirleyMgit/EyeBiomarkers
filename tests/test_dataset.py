@@ -20,7 +20,7 @@ def test_dataset_getitem(synthetic_data_root):
     idx = build_index(synthetic_data_root, eye="left")
     ds = EyeDentifyDataset(idx, EyePreprocessor())
     tensor, true, pid, sid, frame_path = ds[0]
-    assert tensor.shape == (3, 224, 224)
+    assert tensor.shape == (3, 16, 32)
     assert isinstance(true, float) and isinstance(pid, int)
     assert len(ds) == 8
 

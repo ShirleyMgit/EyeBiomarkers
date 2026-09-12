@@ -8,28 +8,40 @@ from .config import ReproConfig
 
 
 class EyePreprocessor:
-    """Turns a cropped eye image into the paper's 224x224 model input tensor."""
+    """Turns a cropped eye image into a model-input tensor.
+
+    Matches the authors' released pipeline: convert to RGB and ToTensor (values in [0, 1]),
+    with no resize and no normalization by default. The model pads the image to 192x192
+    internally, so the raw ~16x32 crop is fed as-is. Resize/normalize are available for
+    experiments but off by default because the deployed checkpoints were trained without them.
+    """
 
     def __init__(
         self,
-        resize_hw: tuple[int, int] = (32, 64),
-        target_size: int = 224,
+        img_size: tuple[int, int] | None = None,
+        normalize: bool = False,
         mean: tuple[float, float, float] = (0.485, 0.456, 0.406),
         std: tuple[float, float, float] = (0.229, 0.224, 0.225),
+        img_mode: str = "RGB",
     ):
-        height, width = resize_hw
-        pad_h = (target_size - height) // 2
-        pad_w = (target_size - width) // 2
-        self._transform = transforms.Compose([
-            transforms.Resize((height, width), interpolation=transforms.InterpolationMode.BICUBIC),
-            transforms.Pad((pad_w, pad_h, pad_w, pad_h), fill=0),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=mean, std=std),
-        ])
+        self._img_mode = img_mode
+        steps = []
+        if img_size is not None:
+            steps.append(
+                transforms.Resize(
+                    (img_size[0], img_size[-1]),
+                    interpolation=transforms.InterpolationMode.BICUBIC,
+                    antialias=True,
+                )
+            )
+        steps.append(transforms.ToTensor())
+        if normalize:
+            steps.append(transforms.Normalize(mean=mean, std=std))
+        self._transform = transforms.Compose(steps)
 
     @classmethod
-    def from_config(cls, config: ReproConfig) -> EyePreprocessor:
-        return cls(config.resize_hw, config.target_size, config.imagenet_mean, config.imagenet_std)
+    def from_config(cls, config: ReproConfig) -> "EyePreprocessor":
+        return cls(config.img_size, config.normalize, config.imagenet_mean, config.imagenet_std, config.img_mode)
 
     def __call__(self, img: Image.Image) -> torch.Tensor:
-        return self._transform(img.convert("RGB"))
+        return self._transform(img.convert(self._img_mode))
