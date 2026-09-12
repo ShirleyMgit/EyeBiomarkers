@@ -13,7 +13,7 @@ from .metrics import add_errors, overall_metrics, per_participant_mape, per_fold
 def evaluate_base(config, base, index_df, preprocessor, model_loader):
     model = model_loader(weights_path_for(config, base), base=base, device=config.device)
     dataset = EyeDentifyDataset(index_df, preprocessor)
-    predictions = add_errors(run_inference(model, dataset, config.batch_size, config.device))
+    predictions = add_errors(run_inference(model, dataset, config.batch_size, config.device, config.num_workers))
     overall = overall_metrics(predictions)
     per_participant = per_participant_mape(predictions)
     dist = summarize_distribution(per_participant)

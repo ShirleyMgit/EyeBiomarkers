@@ -24,6 +24,7 @@ class ReproConfig:
     imagenet_mean: tuple[float, float, float] = (0.485, 0.456, 0.406)
     imagenet_std: tuple[float, float, float] = (0.229, 0.224, 0.225)
     batch_size: int = 128
+    num_workers: int = 0
     eye: str = "left"
     results_dir: Path = field(default_factory=lambda: Path("results"))
     figures_dir: Path = field(default_factory=lambda: Path("figures"))

@@ -9,8 +9,14 @@ from tqdm import tqdm
 from .preprocessing import EyePreprocessor
 
 
-def run_inference(model, dataset, batch_size: int = 128, device: str = "cpu") -> pd.DataFrame:
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+def run_inference(model, dataset, batch_size: int = 128, device: str = "cpu", num_workers: int = 0) -> pd.DataFrame:
+    loader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=(device == "cuda"),
+    )
     records = []
     model = model.to(device)
     model.eval()
