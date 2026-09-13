@@ -19,9 +19,9 @@ class ReproConfig:
     data_root: Path
     weights_dir: Path
     device: str = "cpu"
-    # Model input pipeline — matches the authors' released config: no resize, no normalization.
-    # The model pads the image to 192x192 internally, so preprocessing is just ToTensor on the RGB crop.
-    img_size: tuple[int, int] | None = None
+    # Model input pipeline — best empirical match to the paper: upsample 2x to 32x64 (bicubic),
+    # ToTensor, NO normalization; the model then zero-pads to 224x224 internally.
+    img_size: tuple[int, int] | None = (32, 64)
     normalize: bool = False
     imagenet_mean: tuple[float, float, float] = (0.485, 0.456, 0.406)
     imagenet_std: tuple[float, float, float] = (0.229, 0.224, 0.225)

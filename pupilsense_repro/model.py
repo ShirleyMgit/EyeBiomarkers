@@ -29,7 +29,7 @@ class ResNetRegressor(nn.Module):
     inside forward (the released models were trained on the raw ~16x32 crop padded to 192).
     """
 
-    def __init__(self, base: str = "resnet18", num_classes: int = 1, pad_dim: int = 192, use_regression_head: bool = True):
+    def __init__(self, base: str = "resnet18", num_classes: int = 1, pad_dim: int = 224, use_regression_head: bool = True):
         super().__init__()
         if base not in _RESNET_BUILDERS:
             raise ValueError("Only resnet18/resnet50 supported")
