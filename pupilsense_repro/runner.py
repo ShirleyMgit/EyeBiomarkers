@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from .config import ReproConfig, weights_path_for, PAPER_MAPE
+from .config import ReproConfig, weights_path_for, paper_mape_for
 from .dataset import build_index, EyeDentifyDataset
 from .preprocessing import EyePreprocessor
 from .model import load_eye_model
@@ -19,6 +19,7 @@ def evaluate_base(config, base, index_df, preprocessor, model_loader):
     dist = summarize_distribution(per_participant)
     fold_df = per_fold_metrics(predictions)
     summary_row = {
+        "eye": config.eye,
         "base": base,
         "overall_mae": overall["mae"],
         "overall_mape": overall["mape"],
@@ -27,7 +28,7 @@ def evaluate_base(config, base, index_df, preprocessor, model_loader):
         "per_participant_mape_std": dist["std"],
         "per_fold_mape_mean": float(fold_df["mape"].mean()) if not fold_df.empty else float("nan"),
         "per_fold_mape_std": float(fold_df["mape"].std()) if not fold_df.empty else float("nan"),
-        "paper_mape": PAPER_MAPE.get(base, float("nan")),
+        "paper_mape": paper_mape_for(config.eye, base),
     }
     return predictions, summary_row, per_participant
 
@@ -43,11 +44,11 @@ def run_reproduction(config: ReproConfig, bases=("resnet18", "resnet50"), model_
         predictions, summary_row, per_participant = evaluate_base(
             config, base, index_df, preprocessor, model_loader
         )
-        predictions.to_csv(config.results_dir / f"predictions_{base}.csv", index=False)
+        predictions.to_csv(config.results_dir / f"predictions_{config.eye}_{base}.csv", index=False)
         summary_rows.append(summary_row)
         per_participant_by_base[base] = per_participant
 
     summary = pd.DataFrame(summary_rows)
-    summary.to_csv(config.results_dir / "left_eye_metrics.csv", index=False)
-    pd.DataFrame(per_participant_by_base).to_csv(config.results_dir / "per_participant_mape.csv")
+    summary.to_csv(config.results_dir / f"{config.eye}_eye_metrics.csv", index=False)
+    pd.DataFrame(per_participant_by_base).to_csv(config.results_dir / f"per_participant_mape_{config.eye}.csv")
     return summary

@@ -9,7 +9,14 @@ FOLD_TEST_PARTICIPANTS: dict[int, list[int]] = {
     5: [10, 14, 24, 28, 31],
 }
 
-PAPER_MAPE: dict[str, float] = {"resnet18": 3.411629, "resnet50": 3.234711}
+PAPER_MAPE: dict[str, dict[str, float]] = {
+    "left": {"resnet18": 3.411629, "resnet50": 3.234711},
+    "right": {"resnet18": 4.288911, "resnet50": 3.644096},
+}
+
+
+def paper_mape_for(eye: str, base: str) -> float:
+    return PAPER_MAPE.get(eye, {}).get(base, float("nan"))
 
 _BASE_TO_DIR = {"resnet18": "ResNet18", "resnet50": "ResNet50"}
 

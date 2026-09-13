@@ -1,6 +1,8 @@
 from pathlib import Path
+from dataclasses import replace
+
 from pupilsense_repro.config import (
-    ReproConfig, FOLD_TEST_PARTICIPANTS, PAPER_MAPE, weights_path_for, target_column,
+    ReproConfig, FOLD_TEST_PARTICIPANTS, PAPER_MAPE, weights_path_for, target_column, paper_mape_for,
 )
 
 
@@ -16,4 +18,12 @@ def test_weights_path_and_target_column():
     assert weights_path_for(cfg, "resnet18") == Path("w") / "ResNet18" / "left_eye.pt"
     assert weights_path_for(cfg, "resnet50") == Path("w") / "ResNet50" / "left_eye.pt"
     assert target_column(cfg) == "left_pupil"
-    assert PAPER_MAPE["resnet50"] == 3.234711
+    assert PAPER_MAPE["left"]["resnet50"] == 3.234711
+    assert PAPER_MAPE["right"]["resnet50"] == 3.644096
+
+
+def test_right_eye_paths_targets_and_paper():
+    cfg = replace(ReproConfig(data_root=Path("d"), weights_dir=Path("w")), eye="right")
+    assert weights_path_for(cfg, "resnet50") == Path("w") / "ResNet50" / "right_eye.pt"
+    assert target_column(cfg) == "right_pupil"
+    assert paper_mape_for("right", "resnet18") == 4.288911

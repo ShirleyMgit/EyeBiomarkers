@@ -7,7 +7,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .config import FOLD_TEST_PARTICIPANTS, PAPER_MAPE
+from .config import FOLD_TEST_PARTICIPANTS, paper_mape_for
 
 
 def _fold_of(participant_id: int, folds: dict[int, list[int]]) -> int:
@@ -17,7 +17,7 @@ def _fold_of(participant_id: int, folds: dict[int, list[int]]) -> int:
     return 0
 
 
-def plot_per_participant_mape(per_participant_by_base, out_path, folds=FOLD_TEST_PARTICIPANTS) -> Path:
+def plot_per_participant_mape(per_participant_by_base, out_path, folds=FOLD_TEST_PARTICIPANTS, eye="left") -> Path:
     bases = list(per_participant_by_base)
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.boxplot([per_participant_by_base[b].values for b in bases], tick_labels=bases, showfliers=False)
@@ -26,10 +26,11 @@ def plot_per_participant_mape(per_participant_by_base, out_path, folds=FOLD_TEST
         colors = [_fold_of(pid, folds) for pid in series.index]
         jitter = np.random.default_rng(0).normal(0, 0.05, len(series))
         ax.scatter(np.full(len(series), x) + jitter, series.values, c=colors, cmap="tab10", s=25, alpha=0.8)
-        if base in PAPER_MAPE:
-            ax.hlines(PAPER_MAPE[base], x - 0.3, x + 0.3, colors="red", linestyles="--")
+        paper = paper_mape_for(eye, base)
+        if paper == paper:  # not NaN
+            ax.hlines(paper, x - 0.3, x + 0.3, colors="red", linestyles="--")
     ax.set_ylabel("Per-participant MAPE (%)")
-    ax.set_title("Left-eye per-participant MAPE (red dash = paper mean; point color = fold)")
+    ax.set_title(f"{eye.capitalize()}-eye per-participant MAPE (red dash = paper mean; point color = fold)")
     fig.tight_layout()
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
